@@ -3,17 +3,17 @@ package net.zomis.aiscores;
 /**
  * Scorer that is responsible to give score to fields
  * 
- * @param <Params> Score parameter type
- * @param <Field> The type to apply scores to
+ * @param <P> Score parameter type
+ * @param <F> The type to apply scores to
  */
-public abstract class AbstractScorer<Params, Field> implements Scorer {
+public abstract class AbstractScorer<P, F> implements Scorer {
 	/**
 	 * Determine if this scorer should apply scores to the fields under the given circumstances.
 	 * 
 	 * @param scores Score parameters and analyzes for the scoring
 	 * @return True to work with the parameters, false to exclude this scorer entirely from the current scoring process
 	 */
-	public boolean workWith(ScoreParameters<Params> scores) {
+	public boolean workWith(ScoreParameters<P> scores) {
 		return true;
 	}
 	/**
@@ -22,7 +22,7 @@ public abstract class AbstractScorer<Params, Field> implements Scorer {
 	 * @param scores Parameters and analyzes for the scoring
 	 * @return The score to give to the field
 	 */
-	public abstract double getScoreFor(Field field, ScoreParameters<Params> scores);
+	public abstract double getScoreFor(F field, ScoreParameters<P> scores);
 	
 	@Override
 	public String toString() {

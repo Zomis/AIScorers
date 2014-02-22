@@ -9,6 +9,7 @@ import java.util.Random;
 import net.zomis.aiscores.FieldScore;
 import net.zomis.aiscores.FieldScoreProducer;
 import net.zomis.aiscores.FieldScores;
+import net.zomis.aiscores.ScoreTools;
 
 public class ScoreUtils {
 
@@ -32,7 +33,7 @@ public class ScoreUtils {
 		}
 		if (maxValues == null) 
 			return null;
-		FieldScore<B> chosen = getRandom(maxValues, random);
+		FieldScore<B> chosen = ScoreTools.getRandom(maxValues, random);
 		return new ParamAndField<A, B>(maxParams, chosen);
 	}
 	/**
@@ -54,7 +55,6 @@ public class ScoreUtils {
 	private static <Params, Field> Map<Params, FieldScores<Params, Field>> scoreAll(FieldScoreProducer<Params, Field> producer, Params[] params) {
 		Map<Params, FieldScores<Params, Field>> allScores = new HashMap<Params, FieldScores<Params,Field>>();
 		for (Params param : params) {
-			// TODO: Make it possible to only analyze once. Possibly include analyze data as part of param(!)
 			Map<Class<?>, Object> analyze = producer.analyze(param); 
 			allScores.put(param, producer.score(param, analyze));
 		}
@@ -93,16 +93,7 @@ public class ScoreUtils {
 //			return null;
 		if (maxValues == null) 
 			return null;
-		FieldScore<B> chosen = getRandom(maxValues, random);
+		FieldScore<B> chosen = ScoreTools.getRandom(maxValues, random);
 		return new ParamAndField<A, B>(maxParams, chosen);
 	}
-
-	private static Random staticRandom = new Random();
-	private static <E> E getRandom(List<E> list, Random random) {
-		if (list.isEmpty()) return null;
-		if (random == null) 
-			random = staticRandom;
-		return list.get(random.nextInt(list.size()));
-	}
-	
 }

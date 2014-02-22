@@ -10,10 +10,6 @@ public class CloseToScorer extends AbstractScorer<Params, Integer> {
 	public CloseToScorer(int value) {
 		this.value = value;
 	}
-	@Override
-	public boolean workWith(ScoreParameters<Params> scores) {
-		return true;
-	}
 
 	@Override
 	public double getScoreFor(Integer field, ScoreParameters<Params> scores) {

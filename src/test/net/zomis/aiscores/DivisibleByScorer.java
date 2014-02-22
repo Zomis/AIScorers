@@ -11,10 +11,6 @@ public class DivisibleByScorer extends AbstractScorer<Params, Integer> {
 	public DivisibleByScorer(int mod) {
 		this.mod = mod;
 	}
-	@Override
-	public boolean workWith(ScoreParameters<Params> scores) {
-		return true;
-	}
 
 	@Override
 	public double getScoreFor(Integer field, ScoreParameters<Params> scores) {

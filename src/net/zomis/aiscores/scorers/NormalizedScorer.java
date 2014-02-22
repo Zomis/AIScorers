@@ -11,6 +11,7 @@ import net.zomis.aiscores.ScoreParameters;
 /**
  * This class is NOT thread-safe.
  */
+@Deprecated
 public class NormalizedScorer<Params, Field> extends AbstractScorer<Params, Field> {
 
 	private Map<Field, FieldScore<Field>>	scores;

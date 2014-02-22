@@ -3,26 +3,58 @@ package net.zomis.aiscores;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Factory class for creating a {@link ScoreConfig}
  * 
- * @param <Params> Score parameter type
- * @param <Field> The type to apply scores to
+ * @param <P> Score parameter type
+ * @param <F> The type to apply scores to
  */
-public class ScoreConfigFactory<Params, Field> {
-	private ScoreSet<Params, Field>	scoreSet;
-	private final List<PostScorer<Params, Field>> postScorers;
-	private final List<PreScorer<Params>> preScorers;
+public class ScoreConfigFactory<P, F> {
+	private ScoreSet<P, F>	scoreSet;
+	private final List<PostScorer<P, F>> postScorers;
+	private final List<PreScorer<P>> preScorers;
 
 	public static <Params, Field> ScoreConfigFactory<Params, Field> newInstance() {
 		return new ScoreConfigFactory<Params, Field>();
 	}
 	
 	public ScoreConfigFactory() {
-		this.scoreSet = new ScoreSet<Params, Field>();
-		this.postScorers = new LinkedList<PostScorer<Params, Field>>();
-		this.preScorers = new LinkedList<PreScorer<Params>>();
+		this.scoreSet = new ScoreSet<P, F>();
+		this.postScorers = new LinkedList<PostScorer<P, F>>();
+		this.preScorers = new LinkedList<PreScorer<P>>();
+	}
+	
+	public ScoreConfigFactory<P, F> withScoreConfig(ScoreConfig<P, F> config) {
+		ScoreConfigFactory<P, F> result = this;
+		
+		for (PreScorer<P> pre : config.getPreScorers()) {
+			if (!preScorers.contains(pre))
+				result = withPreScorer(pre);
+		}
+		
+		for (PostScorer<P, F> post : config.getPostScorers()) {
+			if (!postScorers.contains(post))
+				result = withPost(post);
+		}
+		
+		for (Entry<AbstractScorer<P, F>, Double> scorer : config.getScorers().entrySet()) {
+			AbstractScorer<P, F> key = scorer.getKey();
+			double value = scorer.getValue();
+			if (!scoreSet.containsKey(key))
+				result = withScorer(key, value);
+			else {
+				scoreSet.put(key, value + scoreSet.get(key));
+			}
+		}
+		
+		return result;
+	}
+	
+	public ScoreConfigFactory<P, F> copy() {
+		ScoreConfigFactory<P, F> newInstance = new ScoreConfigFactory<P, F>();
+		return newInstance.withScoreConfig(this.build());
 	}
 
 	/**
@@ -30,7 +62,7 @@ public class ScoreConfigFactory<Params, Field> {
 	 * @param scorer Scorer to add
 	 * @return This factory
 	 */
-	public ScoreConfigFactory<Params, Field> withScorer(AbstractScorer<Params, Field> scorer) {
+	public ScoreConfigFactory<P, F> withScorer(AbstractScorer<P, F> scorer) {
 		scoreSet.put(scorer, 1.0);
 		return this;
 	}
@@ -40,7 +72,7 @@ public class ScoreConfigFactory<Params, Field> {
 	 * @param weight Weight that should be applied to the scorer
 	 * @return This factory
 	 */
-	public ScoreConfigFactory<Params, Field> withScorer(AbstractScorer<Params, Field> scorer, double weight) {
+	public ScoreConfigFactory<P, F> withScorer(AbstractScorer<P, F> scorer, double weight) {
 		scoreSet.put(scorer, weight);
 		return this;
 	}
@@ -49,10 +81,10 @@ public class ScoreConfigFactory<Params, Field> {
 	 * @param value Factor to multiply with
 	 * @return This factory
 	 */
-	public ScoreConfigFactory<Params, Field> multiplyAll(double value) {
-		ScoreSet<Params, Field> oldScoreSet = scoreSet;
-		scoreSet = new ScoreSet<Params, Field>();
-		for (Map.Entry<AbstractScorer<Params, Field>, Double> ee : oldScoreSet.entrySet()) {
+	public ScoreConfigFactory<P, F> multiplyAll(double value) {
+		ScoreSet<P, F> oldScoreSet = scoreSet;
+		scoreSet = new ScoreSet<P, F>();
+		for (Map.Entry<AbstractScorer<P, F>, Double> ee : oldScoreSet.entrySet()) {
 			scoreSet.put(ee.getKey(), ee.getValue() * value);
 		}
 
@@ -64,7 +96,7 @@ public class ScoreConfigFactory<Params, Field> {
 	 * @param post PostScorer to add
 	 * @return This factory
 	 */
-	public ScoreConfigFactory<Params, Field> withPost(PostScorer<Params, Field> post) {
+	public ScoreConfigFactory<P, F> withPost(PostScorer<P, F> post) {
 		postScorers.add(post);
 		return this;
 	}
@@ -73,8 +105,8 @@ public class ScoreConfigFactory<Params, Field> {
 	 * Create a {@link ScoreConfig} from this factory.
 	 * @return A {@link ScoreConfig} for the {@link PreScorer}s, {@link PostScorer} and {@link AbstractScorer}s that has been added to this factory.
 	 */
-	public ScoreConfig<Params, Field> build() {
-		return new ScoreConfig<Params, Field>(this.preScorers, this.postScorers, this.scoreSet);
+	public ScoreConfig<P, F> build() {
+		return new ScoreConfig<P, F>(this.preScorers, this.postScorers, this.scoreSet);
 	}
 
 	/**
@@ -82,7 +114,7 @@ public class ScoreConfigFactory<Params, Field> {
 	 * @param analyzer PreScorer to add
 	 * @return This factory
 	 */
-	public ScoreConfigFactory<Params, Field> withPreScorer(PreScorer<Params> analyzer) {
+	public ScoreConfigFactory<P, F> withPreScorer(PreScorer<P> analyzer) {
 		this.preScorers.add(analyzer);
 		return this;
 	}

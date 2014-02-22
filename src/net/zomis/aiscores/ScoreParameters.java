@@ -1,10 +1,12 @@
 package net.zomis.aiscores;
 
+import java.util.Map;
+
 /**
  * Interface for retrieving analyzes and parameters that are used for scoring 
- * @param <Params> Score parameter type
+ * @param <P> Score parameter type
  */
-public interface ScoreParameters<Params> {
+public interface ScoreParameters<P> {
 	/**
 	 * @param clazz The class to get the analyze for
 	 * @return The analyze for the specified class, or null if none was found
@@ -13,5 +15,10 @@ public interface ScoreParameters<Params> {
 	/**
 	 * @return Parameter object that are used in the scoring
 	 */
-	Params getParameters();
+	P getParameters();
+	/**
+	 * @return All available analyze objects
+	 */
+	Map<Class<?>, Object> getAnalyzes();
+	ScoreStrategy<P, ?> getScoreStrategy();
 }

@@ -12,11 +12,6 @@ public class StaticScorer<Params, Field> extends AbstractScorer<Params, Field> {
 	}
 
 	@Override
-	public boolean workWith(ScoreParameters<Params> scores) {
-		return true;
-	}
-
-	@Override
 	public double getScoreFor(Field field, ScoreParameters<Params> scores) {
 		return score;
 	}

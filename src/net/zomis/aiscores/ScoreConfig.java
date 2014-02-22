@@ -6,38 +6,38 @@ import java.util.List;
 /**
  * Score Configuration containing instances of {@link PreScorer}, {@link PostScorer} and {@link AbstractScorer}
  *
- * @param <Params> Score parameter type
- * @param <Field> The type to apply scores to
+ * @param <P> Score parameter type
+ * @param <F> The type to apply scores to
  */
-public class ScoreConfig<Params, Field> {
-	private final ScoreSet<Params, Field> scorers;
-	private final List<PostScorer<Params, Field>> postScorers;
-	private final List<PreScorer<Params>> preScorers;
+public class ScoreConfig<P, F> {
+	private final ScoreSet<P, F> scorers;
+	private final List<PostScorer<P, F>> postScorers;
+	private final List<PreScorer<P>> preScorers;
 	
-	public ScoreConfig(ScoreConfig<Params, Field> copy) {
+	public ScoreConfig(ScoreConfig<P, F> copy) {
 		this(copy.preScorers, copy.postScorers, copy.scorers);
 	}
 	
-	public ScoreConfig(List<PreScorer<Params>> preScorers, List<PostScorer<Params, Field>> postScorers, ScoreSet<Params, Field> scorers) {
-		this.postScorers = new ArrayList<PostScorer<Params,Field>>(postScorers);
-		this.preScorers = new ArrayList<PreScorer<Params>>(preScorers);
-		this.scorers = new ScoreSet<Params, Field>(scorers);
+	public ScoreConfig(List<PreScorer<P>> preScorers, List<PostScorer<P, F>> postScorers, ScoreSet<P, F> scorers) {
+		this.postScorers = new ArrayList<PostScorer<P,F>>(postScorers);
+		this.preScorers = new ArrayList<PreScorer<P>>(preScorers);
+		this.scorers = new ScoreSet<P, F>(scorers);
 	}
 
-	public List<PostScorer<Params, Field>> getPostScorers() {
+	public List<PostScorer<P, F>> getPostScorers() {
 		return postScorers;
 	}
 
-	public ScoreSet<Params, Field> getScorers() {
+	public ScoreSet<P, F> getScorers() {
 		return scorers;
 	}
 
-	public List<PreScorer<Params>> getPreScorers() {
+	public List<PreScorer<P>> getPreScorers() {
 		return preScorers;
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("Scorers:{PreScorer: %s, PostScorer: %s, Scorers: %s}", preScorers, postScorers, scorers);
+		return "Scorers:{PreScorer: " + preScorers + ", PostScorer: " + postScorers + ", Scorers: " + scorers + "}";
 	}
 }

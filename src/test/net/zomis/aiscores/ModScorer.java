@@ -12,11 +12,6 @@ public class ModScorer extends AbstractScorer<Params, Integer> {
 	}
 	
 	@Override
-	public boolean workWith(ScoreParameters<Params> scores) {
-		return true;
-	}
-
-	@Override
 	public double getScoreFor(Integer field, ScoreParameters<Params> scores) {
 		return field % value;
 	}

@@ -6,31 +6,30 @@ import java.util.Map;
 /**
  * 
  *
- * @param <Params> Score parameter type
- * @param <Field> The type to apply scores to
+ * @param <P> Score parameter type
+ * @param <F> The type to apply scores to
  */
-public class FieldScoreProducer<Params, Field> {
-	private final ScoreConfig<Params, Field> config;
+public class FieldScoreProducer<P, F> {
+	private final ScoreConfig<P, F> config;
 
 	private boolean detailed;
-	private final ScoreStrategy<Params, Field> scoreStrategy;
+	private final ScoreStrategy<P, F> scoreStrategy;
 
-	public FieldScoreProducer(ScoreConfig<Params, Field> config, ScoreStrategy<Params, Field> strat) {
+	public FieldScoreProducer(ScoreConfig<P, F> config, ScoreStrategy<P, F> strat) {
 		this.config = config;
 		this.scoreStrategy = strat;
 	}
 	
-	public FieldScores<Params, Field> score(Params params, Map<Class<?>, Object> analyzes) {
-		FieldScores<Params, Field> scores = new FieldScores<Params, Field>(params, config, scoreStrategy);
+	public FieldScores<P, F> score(P params, Map<Class<?>, Object> analyzes) {
+		FieldScores<P, F> scores = new FieldScores<P, F>(params, config, scoreStrategy);
 		scores.setAnalyzes(analyzes);
 		scores.setDetailed(this.detailed);
-		
 		scores.determineActiveScorers();
 		scores.calculateScores();
 		scores.rankScores();
 		scores.postHandle();
 		
-		for (PreScorer<Params> prescore : config.getPreScorers()) {
+		for (PreScorer<P> prescore : config.getPreScorers()) {
 			prescore.onScoringComplete();
 		}
 		
@@ -48,9 +47,9 @@ public class FieldScoreProducer<Params, Field> {
 		this.detailed = detailed;
 	}
 	
-	public Map<Class<?>, Object> analyze(Params param) {
+	public Map<Class<?>, Object> analyze(P param) {
 		Map<Class<?>, Object> analyze = new HashMap<Class<?>, Object>();
-		for (PreScorer<Params> preScorers : this.config.getPreScorers()) {
+		for (PreScorer<P> preScorers : this.config.getPreScorers()) {
 			Object data = preScorers.analyze(param);
 			if (data == null) 
 				continue; // avoid NullPointerException
@@ -59,11 +58,11 @@ public class FieldScoreProducer<Params, Field> {
 		return analyze;
 	}
 
-	public ScoreConfig<Params, Field> getConfig() {
+	public ScoreConfig<P, F> getConfig() {
 		return this.config;
 	}
 
-	public FieldScores<Params, Field> analyzeAndScore(Params params) {
+	public FieldScores<P, F> analyzeAndScore(P params) {
 		return this.score(params, this.analyze(params));
 	}
 }

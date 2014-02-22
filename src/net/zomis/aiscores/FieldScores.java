@@ -1,29 +1,27 @@
 package net.zomis.aiscores;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Class containing scores, information about ranks, analyzes, and which score configuration that was used.
  *
- * @param <Params> Score parameter type
- * @param <Field> The type to apply scores to
+ * @param <P> Score parameter type
+ * @param <F> The type to apply scores to
  */
-public class FieldScores<Params, Field> implements ScoreParameters<Params> {
-	private final ScoreConfig<Params, Field>	config;
-	private final Map<Field, FieldScore<Field>> scores = new HashMap<Field, FieldScore<Field>>();
-	private final Params 						params;
-	private final ScoreStrategy<Params, Field> 	scoreStrategy;
+public class FieldScores<P, F> implements ScoreParameters<P> {
+	private final ScoreConfig<P, F>	config;
+	private final Map<F, FieldScore<F>> scores = new HashMap<F, FieldScore<F>>();
+	private final P params;
+	private final ScoreStrategy<P, F> scoreStrategy;
 	
-	private List<AbstractScorer<Params, Field>> activeScorers;
-	private List<List<FieldScore<Field>>> 		rankedScores;
+	private List<AbstractScorer<P, F>> activeScorers;
+	private List<List<FieldScore<F>>> rankedScores;
 	private Map<Class<?>, Object> analyzes;
 	private boolean detailed;
 	
@@ -32,23 +30,29 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 		return (E) this.analyzes.get(clazz);
 	}
 	
+	@Override
 	public Map<Class<?>, Object> getAnalyzes() {
-		return new HashMap<Class<?>, Object>();
+		return new HashMap<Class<?>, Object>(this.analyzes);
 	}
 	
-	FieldScores(Params params, ScoreConfig<Params, Field> config, ScoreStrategy<Params, Field> strat) {
+	FieldScores(P params, ScoreConfig<P, F> config, ScoreStrategy<P, F> strat) {
 		this.params = params;
 		this.config = config;
 		this.scoreStrategy = strat;
+	}
+	
+	@Override
+	public ScoreStrategy<P, F> getScoreStrategy() {
+		return scoreStrategy;
 	}
 
 	/**
 	 * Call each {@link AbstractScorer}'s workWith method to determine if that scorer is currently applicable
 	 */
 	void determineActiveScorers() {
-		activeScorers = new ArrayList<AbstractScorer<Params, Field>>();
+		activeScorers = new ArrayList<AbstractScorer<P, F>>();
 
-		for (AbstractScorer<Params, Field> scorer : config.getScorers().keySet()) {
+		for (AbstractScorer<P, F> scorer : config.getScorers().keySet()) {
 			if (scorer.workWith(this)) {
 				activeScorers.add(scorer);
 			}
@@ -59,12 +63,12 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 	 * Process the {@link AbstractScorer}s to let them add their score for each field. Uses the {@link ScoreStrategy} associated with this object to determine which fields should be scored.
 	 */
 	void calculateScores() {
-		for (Field field : this.scoreStrategy.getFieldsToScore(params)) {
+		for (F field : this.scoreStrategy.getFieldsToScore(params)) {
 			if (!this.scoreStrategy.canScoreField(this, field))
 				continue;
 			
-			FieldScore<Field> fscore = new FieldScore<Field>(field, detailed);
-			for (AbstractScorer<Params, Field> scorer : activeScorers) {
+			FieldScore<F> fscore = new FieldScore<F>(field, detailed);
+			for (AbstractScorer<P, F> scorer : activeScorers) {
 				double computedScore = scorer.getScoreFor(field, this);
 				double weight = config.getScorers().get(scorer);
 				fscore.addScore(scorer, computedScore, weight);
@@ -77,13 +81,14 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 	 * Call {@link PostScorer}s to let them do their job, after the main scorers have been processed.
 	 */
 	void postHandle() {
-		for (PostScorer<Params, Field> post : this.config.getPostScorers()) {
+		for (PostScorer<P, F> post : this.config.getPostScorers()) {
 			post.handle(this);
+			this.rankScores(); // Because post-scorers might change the result, re-rank the scores to always have proper numbers.
 		}
 	}
 
 	@Override
-	public Params getParameters() {
+	public P getParameters() {
 		return this.params;
 	}
 
@@ -91,15 +96,15 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 	 * Get a List of all the ranks. Each rank is a list of all the {@link FieldScore} objects in that rank
 	 * @return A list of all the ranks, where the first item in the list is the best rank
 	 */
-	public List<List<FieldScore<Field>>> getRankedScores() {
+	public List<List<FieldScore<F>>> getRankedScores() {
 		return rankedScores;
 	}
 
 	/**
 	 * @return A {@link HashMap} copy of the scores that are contained in this object
 	 */
-	public Map<Field, FieldScore<Field>> getScores() {
-		return new HashMap<Field, FieldScore<Field>>(this.scores);
+	public Map<F, FieldScore<F>> getScores() {
+		return new HashMap<F, FieldScore<F>>(this.scores);
 	}
 
 	/**
@@ -107,7 +112,7 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 	 * @param field Field to get data for
 	 * @return FieldScore for the specified field.
 	 */
-	public FieldScore<Field> getScoreFor(Field field) {
+	public FieldScore<F> getScoreFor(F field) {
 		return scores.get(field);
 	}
 
@@ -115,8 +120,8 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 	 * (Re-)calculates rankings for all the fields, and also calculates a normalization of their score
 	 */
 	public void rankScores() {
-		SortedSet<Entry<Field, FieldScore<Field>>> sorted = entriesSortedByValues(this.scores, true);
-		rankedScores = new LinkedList<List<FieldScore<Field>>>();
+		SortedSet<Entry<F, FieldScore<F>>> sorted = ScoreTools.entriesSortedByValues(this.scores, true);
+		rankedScores = new LinkedList<List<FieldScore<F>>>();
 		if (sorted.isEmpty())
 			return;
 		double minScore = sorted.last().getValue().getScore();
@@ -124,16 +129,16 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 		double lastScore = maxScore + 1;
 		
 		int rank = 0;
-		List<FieldScore<Field>> currentRank = new LinkedList<FieldScore<Field>>();
-		for (Entry<Field, FieldScore<Field>> score : sorted) {
+		List<FieldScore<F>> currentRank = new LinkedList<FieldScore<F>>();
+		for (Entry<F, FieldScore<F>> score : sorted) {
 			if (lastScore != score.getValue().getScore()) {
 				lastScore = score.getValue().getScore();
 				rank++;
-				currentRank = new LinkedList<FieldScore<Field>>();
+				currentRank = new LinkedList<FieldScore<F>>();
 				rankedScores.add(currentRank);
 			}
 			score.getValue().setRank(rank);
-			double normalized = normalized(score.getValue().getScore(), minScore, maxScore - minScore);
+			double normalized = ScoreTools.normalized(score.getValue().getScore(), minScore, maxScore - minScore);
 
 			score.getValue().setNormalized(normalized);
 			currentRank.add(score.getValue());
@@ -141,39 +146,11 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 	}
 	
 	/**
-	 * Normalize a value to the range 0..1 (inclusive)
-	 * @param value Value to normalize
-	 * @param min The minimum of all values
-	 * @param range The range of the values (max - min)
-	 * @return
-	 */
-	private static double normalized(double value, double min, double range) {
-		if (range == 0.0) return 0;
-		return ((value - min) / range);
-	}
-	
-	private static <K, V extends Comparable<? super V>> SortedSet<Map.Entry<K, V>> entriesSortedByValues(Map<K, V> map, final boolean descending) {
-		SortedSet<Map.Entry<K, V>> sortedEntries = new TreeSet<Map.Entry<K, V>>(
-			new Comparator<Map.Entry<K, V>>() {
-				@Override
-				public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
-					int res;
-					if (descending)	res = e1.getValue().compareTo(e2.getValue());
-					else res = e2.getValue().compareTo(e1.getValue());
-					return res != 0 ? -res : 1; // Special fix to preserve items with equal values
-				}
-		    }
-		);
-		sortedEntries.addAll(map.entrySet());
-		return sortedEntries;
-	}
-	
-	/**
 	 * Get all {@link FieldScore} objects for a specific rank
 	 * @param rank From 1 to getRankLength() 
 	 * @return A list of all FieldScores for the specified rank
 	 */
-	public List<FieldScore<Field>> getRank(int rank) {
+	public List<FieldScore<F>> getRank(int rank) {
 		if (rankedScores.isEmpty()) return null;
 		return rankedScores.get(rank - 1);
 	}
@@ -187,7 +164,7 @@ public class FieldScores<Params, Field> implements ScoreParameters<Params> {
 	/**
 	 * @return The score configuration that was used to calculate these field scores.
 	 */
-	public ScoreConfig<Params, Field> getConfig() {
+	public ScoreConfig<P, F> getConfig() {
 		return this.config;
 	}
 

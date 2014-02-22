@@ -6,16 +6,16 @@ import java.util.Map;
 /**
  * Score container for a specific field.
  *
- * @param <ScoreField> The type to apply scores to.
+ * @param <F> The type to apply scores to.
  */
-public class FieldScore<ScoreField> implements Comparable<FieldScore<ScoreField>> {
+public class FieldScore<F> implements Comparable<FieldScore<F>> {
 	private int rank;
 	private double score;
-	private final ScoreField field;
+	private final F field;
 	private final Map<Scorer, Double> specificScorers;
 	private double	normalized;
 	
-	public FieldScore(ScoreField field) {
+	public FieldScore(F field) {
 		this(field, false);
 	}
 	/**
@@ -23,12 +23,12 @@ public class FieldScore<ScoreField> implements Comparable<FieldScore<ScoreField>
 	 * @param field Field to score
 	 * @param detailed If true, details about how much score is given from each scorer will be saved
 	 */
-	public FieldScore(ScoreField field, boolean detailed) {
+	public FieldScore(F field, boolean detailed) {
 		this.field = field;
 		this.specificScorers = detailed ? new HashMap<Scorer, Double>() : null;
 	}
 
-	void addScore(AbstractScorer<?, ScoreField> scorer, double score, double weight) {
+	void addScore(AbstractScorer<?, F> scorer, double score, double weight) {
 		double add = score * weight;
 		this.saveScore(scorer, add);
 	}
@@ -48,7 +48,7 @@ public class FieldScore<ScoreField> implements Comparable<FieldScore<ScoreField>
 	}
 
 	@Override
-	public int compareTo(FieldScore<ScoreField> other) {
+	public int compareTo(FieldScore<F> other) {
 		return Double.compare(this.score, other.score);
 	}
 
@@ -60,11 +60,11 @@ public class FieldScore<ScoreField> implements Comparable<FieldScore<ScoreField>
 	 * Get the field represented by this {@link FieldScore}
 	 * @return The field that this object contains score for
 	 */
-	public ScoreField getField() {
+	public F getField() {
 		return this.field;
 	}
 
-	void giveExtraScore(PostScorer<?, ScoreField> scorer, double bonus) {
+	void giveExtraScore(PostScorer<?, F> scorer, double bonus) {
 		this.saveScore(scorer, bonus);
 	}
 	
@@ -94,6 +94,6 @@ public class FieldScore<ScoreField> implements Comparable<FieldScore<ScoreField>
 	
 	@Override
 	public String toString() {
-		return String.format("(%s score %f)", this.field, this.score);
+		return "(" + this.field + " score " + this.score + ")";
 	}
 }
