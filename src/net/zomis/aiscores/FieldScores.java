@@ -27,7 +27,10 @@ public class FieldScores<P, F> implements ScoreParameters<P> {
 	
 	@SuppressWarnings("unchecked")
 	public <E> E getAnalyze(Class<E> clazz) {
-		return (E) this.analyzes.get(clazz);
+		E value = (E) this.analyzes.get(clazz);
+		if (value == null)
+			throw new NullPointerException("Analyze " + clazz + " not found. Did you forget to add a PreScorer using ScoreConfigFactory.withPreScorer?");
+		return value;
 	}
 	
 	@Override
