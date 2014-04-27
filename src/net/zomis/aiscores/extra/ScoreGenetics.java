@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.SortedSet;
 
-import net.zomis.aiscores.AbstractScorer;
+import net.zomis.aiscores.FScorer;
 import net.zomis.aiscores.PostScorer;
 import net.zomis.aiscores.PreScorer;
 import net.zomis.aiscores.ScoreConfig;
@@ -56,8 +56,8 @@ public class ScoreGenetics<A, B, C> {
 	private C modify(C ai) {
 		ScoreConfig<A, B> config = this.geneticFace.getConfigFor(ai);
 		ScoreSet<A, B> scores = config.getScorers();
-		List<AbstractScorer<A, B>> scorerList = new ArrayList<AbstractScorer<A, B>>(scores.keySet());
-		AbstractScorer<A, B> rand = ScoreTools.getRandom(scorerList, random);
+		List<FScorer<A, B>> scorerList = new ArrayList<FScorer<A, B>>(scores.keySet());
+		FScorer<A, B> rand = ScoreTools.getRandom(scorerList, random);
 		
 		ScoreConfigFactory<A, B> factory = new ScoreConfigFactory<A, B>();
 		for (PreScorer<A> ee : config.getPreScorers())
@@ -65,7 +65,7 @@ public class ScoreGenetics<A, B, C> {
 		for (PostScorer<A, B> ee : config.getPostScorers())
 			factory.withPost(ee);
 		
-		for (Entry<AbstractScorer<A, B>, Double> ee : scores.entrySet()) {
+		for (Entry<FScorer<A, B>, Double> ee : scores.entrySet()) {
 			if (ee.getKey() == rand)
 				factory.withScorer(ee.getKey(), (random.nextDouble() - 0.5) * 2);
 			else factory.withScorer(ee.getKey(), ee.getValue());

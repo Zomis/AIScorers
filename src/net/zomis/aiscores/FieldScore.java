@@ -28,7 +28,7 @@ public class FieldScore<F> implements Comparable<FieldScore<F>> {
 		this.specificScorers = detailed ? new HashMap<Scorer, Double>() : null;
 	}
 
-	void addScore(AbstractScorer<?, F> scorer, double score, double weight) {
+	void addScore(FScorer<?, F> scorer, double score, double weight) {
 		double add = score * weight;
 		this.saveScore(scorer, add);
 	}

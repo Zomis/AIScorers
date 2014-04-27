@@ -39,8 +39,8 @@ public class ScoreConfigFactory<P, F> {
 				result = withPost(post);
 		}
 		
-		for (Entry<AbstractScorer<P, F>, Double> scorer : config.getScorers().entrySet()) {
-			AbstractScorer<P, F> key = scorer.getKey();
+		for (Entry<FScorer<P, F>, Double> scorer : config.getScorers().entrySet()) {
+			FScorer<P, F> key = scorer.getKey();
 			double value = scorer.getValue();
 			if (!scoreSet.containsKey(key))
 				result = withScorer(key, value);
@@ -62,7 +62,7 @@ public class ScoreConfigFactory<P, F> {
 	 * @param scorer Scorer to add
 	 * @return This factory
 	 */
-	public ScoreConfigFactory<P, F> withScorer(AbstractScorer<P, F> scorer) {
+	public ScoreConfigFactory<P, F> withScorer(FScorer<P, F> scorer) {
 		scoreSet.put(scorer, 1.0);
 		return this;
 	}
@@ -72,7 +72,7 @@ public class ScoreConfigFactory<P, F> {
 	 * @param weight Weight that should be applied to the scorer
 	 * @return This factory
 	 */
-	public ScoreConfigFactory<P, F> withScorer(AbstractScorer<P, F> scorer, double weight) {
+	public ScoreConfigFactory<P, F> withScorer(FScorer<P, F> scorer, double weight) {
 		scoreSet.put(scorer, weight);
 		return this;
 	}
@@ -84,7 +84,7 @@ public class ScoreConfigFactory<P, F> {
 	public ScoreConfigFactory<P, F> multiplyAll(double value) {
 		ScoreSet<P, F> oldScoreSet = scoreSet;
 		scoreSet = new ScoreSet<P, F>();
-		for (Map.Entry<AbstractScorer<P, F>, Double> ee : oldScoreSet.entrySet()) {
+		for (Map.Entry<FScorer<P, F>, Double> ee : oldScoreSet.entrySet()) {
 			scoreSet.put(ee.getKey(), ee.getValue() * value);
 		}
 

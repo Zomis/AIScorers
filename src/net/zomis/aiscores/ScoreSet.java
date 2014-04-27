@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
  * @param <P> Score parameter type
  * @param <F> The type to apply scores to
  */
-public class ScoreSet<P, F> extends LinkedHashMap<AbstractScorer<P, F>, Double> {
+public class ScoreSet<P, F> extends LinkedHashMap<FScorer<P, F>, Double> {
 	private static final long	serialVersionUID	= 5924233965213820945L;
 
 	ScoreSet() {

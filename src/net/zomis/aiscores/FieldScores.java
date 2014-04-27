@@ -20,7 +20,7 @@ public class FieldScores<P, F> implements ScoreParameters<P> {
 	private final P params;
 	private final ScoreStrategy<P, F> scoreStrategy;
 	
-	private List<AbstractScorer<P, F>> activeScorers;
+	private List<FScorer<P, F>> activeScorers;
 	private List<List<FieldScore<F>>> rankedScores;
 	private Map<Class<?>, Object> analyzes;
 	private boolean detailed;
@@ -53,10 +53,11 @@ public class FieldScores<P, F> implements ScoreParameters<P> {
 	 * Call each {@link AbstractScorer}'s workWith method to determine if that scorer is currently applicable
 	 */
 	void determineActiveScorers() {
-		activeScorers = new ArrayList<AbstractScorer<P, F>>();
+		activeScorers = new ArrayList<FScorer<P, F>>();
 
-		for (AbstractScorer<P, F> scorer : config.getScorers().keySet()) {
-			if (scorer.workWith(this)) {
+		for (FScorer<P, F> scorer : config.getScorers().keySet()) {
+			FScorer<P, F> realScorer = scorer.scoreWith(this);
+			if (realScorer != null) {
 				activeScorers.add(scorer);
 			}
 		}
@@ -71,7 +72,7 @@ public class FieldScores<P, F> implements ScoreParameters<P> {
 				continue;
 			
 			FieldScore<F> fscore = new FieldScore<F>(field, detailed);
-			for (AbstractScorer<P, F> scorer : activeScorers) {
+			for (FScorer<P, F> scorer : activeScorers) {
 				double computedScore = scorer.getScoreFor(field, this);
 				double weight = config.getScorers().get(scorer);
 				fscore.addScore(scorer, computedScore, weight);

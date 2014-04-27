@@ -1,9 +1,6 @@
 package net.zomis.aiscores.scorers;
 
-import java.util.Map;
-
-import net.zomis.aiscores.AbstractScorer;
-import net.zomis.aiscores.FieldScore;
+import net.zomis.aiscores.FScorer;
 import net.zomis.aiscores.FieldScoreProducer;
 import net.zomis.aiscores.FieldScores;
 import net.zomis.aiscores.ScoreConfig;
@@ -12,42 +9,39 @@ import net.zomis.aiscores.ScoreParameters;
 import net.zomis.aiscores.ScoreStrategy;
 
 /**
- * This class is NOT thread-safe.
+ * This class SHOULD be thread-safe now
  */
-public class NormalizedScorer2<Params, Field> extends AbstractScorer<Params, Field> {
+public class NormalizedScorer2<P, F> implements FScorer<P, F> {
 
-	private Map<Field, FieldScore<Field>>	scores;
-	private FieldScoreProducer<Params, Field>	producer;
-	private final ScoreConfig<Params, Field> config;
+	private final ScoreConfig<P, F> config;
 	
 	@Override
 	public String toString() {
 		return super.toString() + "-" + config;
 	}
 	
-	public NormalizedScorer2(ScoreConfig<Params, Field> config) {
+	public NormalizedScorer2(ScoreConfig<P, F> config) {
 		this.config = config;
 	}
-	public NormalizedScorer2(AbstractScorer<Params, Field> scorer) {
-		this.config = new ScoreConfigFactory<Params, Field>().withScorer(scorer).build();
+	
+	public NormalizedScorer2(FScorer<P, F> scorer) {
+		this(new ScoreConfigFactory<P, F>().withScorer(scorer).build());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean workWith(ScoreParameters<Params> scores) {
-		producer = new FieldScoreProducer<Params, Field>(config, (ScoreStrategy<Params, Field>) scores.getScoreStrategy());
-		FieldScores<Params, Field> fscores = producer.score(scores.getParameters(), scores.getAnalyzes());
+	public FScorer<P, F> scoreWith(ScoreParameters<P> scores) {
+		FieldScoreProducer<P, F> producer = new FieldScoreProducer<P, F>(config, (ScoreStrategy<P, F>) scores.getScoreStrategy());
+		FieldScores<P, F> fscores = producer.score(scores.getParameters(), scores.getAnalyzes());
 		if (fscores == null) {
-			this.scores = null;
-			return false;
+			return null;
 		}
-		this.scores = fscores.getScores();
-		return true;
+		return new CacheScorer<P, F>(fscores.getScores());
 	}
-
+	
 	@Override
-	public double getScoreFor(Field field, ScoreParameters<Params> scores) {
-		return this.scores.get(field).getNormalized();
+	public double getScoreFor(F field, ScoreParameters<P> scores) {
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -5,36 +5,42 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import net.zomis.aiscores.AbstractScorer;
+import net.zomis.aiscores.FScorer;
 import net.zomis.aiscores.ScoreParameters;
 
-public class MultiplicationScorer<Params, Field> extends AbstractScorer<Params, Field> {
+public class MultiplicationScorer<P, F> implements FScorer<P, F> {
 
-	private Collection<AbstractScorer<Params, Field>> scorers;
+	private Collection<FScorer<P, F>> scorers;
 
-	public MultiplicationScorer(AbstractScorer<Params, Field>... scorers) {
-		this(new ArrayList<AbstractScorer<Params, Field>>(Arrays.asList(scorers)));
+	public MultiplicationScorer(FScorer<P, F>... scorers) {
+		this(new ArrayList<FScorer<P, F>>(Arrays.asList(scorers)));
 	}
-	public MultiplicationScorer(List<AbstractScorer<Params, Field>> scorers) {
-		this.scorers = new ArrayList<AbstractScorer<Params,Field>>(scorers);
+	
+	public MultiplicationScorer(List<FScorer<P, F>> scorers) {
+		this.scorers = new ArrayList<FScorer<P,F>>(scorers);
 	}
+	
 	@SuppressWarnings("unchecked")
-	public MultiplicationScorer(AbstractScorer<Params, Field> scorerA, AbstractScorer<Params, Field> scorerB) {
-		this(new ArrayList<AbstractScorer<Params, Field>>(Arrays.asList(scorerA, scorerB)));
+	public MultiplicationScorer(FScorer<P, F> scorerA, FScorer<P, F> scorerB) {
+		this(new ArrayList<FScorer<P, F>>(Arrays.asList(scorerA, scorerB)));
 	}
 	
 	@Override
-	public boolean workWith(ScoreParameters<Params> scores) {
-		boolean b = true;
-		for (AbstractScorer<Params, Field> scorer : scorers)
-			b = b && scorer.workWith(scores);
-		return b;
+	public FScorer<P, F> scoreWith(ScoreParameters<P> scores) {
+		List<FScorer<P, F>> use = new ArrayList<FScorer<P,F>>(scorers.size());
+		for (FScorer<P, F> scorer : scorers) {
+			FScorer<P, F> useScorer = scorer.scoreWith(scores);
+			if (useScorer == null)
+				return null;
+			use.add(useScorer);
+		}
+		return new MultiplicationScorer<P, F>(use);
 	}
 	
 	@Override
-	public double getScoreFor(Field field, ScoreParameters<Params> scores) {
+	public double getScoreFor(F field, ScoreParameters<P> scores) {
 		double ret = 1;
-		for (AbstractScorer<Params, Field> scorer : scorers)
+		for (FScorer<P, F> scorer : scorers)
 			ret = ret * scorer.getScoreFor(field, scores);
 		return ret;
 	}
