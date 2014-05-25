@@ -1,6 +1,5 @@
 package net.zomis.aiscores;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +19,7 @@ public class FieldScores<P, F> implements ScoreParameters<P> {
 	private final P params;
 	private final ScoreStrategy<P, F> scoreStrategy;
 	
-	private List<FScorer<P, F>> activeScorers;
+	private Map<FScorer<P, F>, Double> activeScorers;
 	private List<List<FieldScore<F>>> rankedScores;
 	private Map<Class<?>, Object> analyzes;
 	private boolean detailed;
@@ -53,12 +52,12 @@ public class FieldScores<P, F> implements ScoreParameters<P> {
 	 * Call each {@link AbstractScorer}'s workWith method to determine if that scorer is currently applicable
 	 */
 	void determineActiveScorers() {
-		activeScorers = new ArrayList<FScorer<P, F>>();
+		activeScorers = new HashMap<FScorer<P, F>, Double>();
 
 		for (FScorer<P, F> scorer : config.getScorers().keySet()) {
 			FScorer<P, F> realScorer = scorer.scoreWith(this);
 			if (realScorer != null) {
-				activeScorers.add(scorer);
+				activeScorers.put(realScorer, config.getScorers().get(scorer));
 			}
 		}
 	}
@@ -67,14 +66,19 @@ public class FieldScores<P, F> implements ScoreParameters<P> {
 	 * Process the {@link AbstractScorer}s to let them add their score for each field. Uses the {@link ScoreStrategy} associated with this object to determine which fields should be scored.
 	 */
 	void calculateScores() {
+		if (config == null)
+			throw new NullPointerException("Config is null");
+		if (config.getScorers() == null)
+			throw new NullPointerException("Config does not have any scorers");
 		for (F field : this.scoreStrategy.getFieldsToScore(params)) {
 			if (!this.scoreStrategy.canScoreField(this, field))
 				continue;
 			
 			FieldScore<F> fscore = new FieldScore<F>(field, detailed);
-			for (FScorer<P, F> scorer : activeScorers) {
+			for (Entry<FScorer<P, F>, Double> ee : activeScorers.entrySet()) {
+				FScorer<P, F> scorer = ee.getKey();
 				double computedScore = scorer.getScoreFor(field, this);
-				double weight = config.getScorers().get(scorer);
+				double weight = ee.getValue();
 				fscore.addScore(scorer, computedScore, weight);
 			}
 			scores.put(field, fscore);

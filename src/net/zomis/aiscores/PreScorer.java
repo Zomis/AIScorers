@@ -11,6 +11,7 @@ public interface PreScorer<P> {
 	 * @return The object that can be retrieved by the scorers
 	 */
 	Object analyze(P params);
+	
 	/**
 	 * Method that can be used to clean-up variables and resources. Called when a {@link FieldScores} object has been fully completed.
 	 */
