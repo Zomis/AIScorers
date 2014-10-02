@@ -55,7 +55,7 @@ public class SimpleTTT implements ScoreStrategy<SimpleTTT, TTTSquare> {
 		return winnables;
 	}
 	
-	private TTTSquare getSquare(int xx, int yy) {
+	public TTTSquare getSquare(int xx, int yy) {
 		if (xx < 0 || yy < 0)
 			return null;
 		if (xx >= SIZE || yy >= SIZE)

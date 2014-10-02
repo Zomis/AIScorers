@@ -1,5 +1,7 @@
 package test.net.zomis.aiscores.ttt;
 
+import static org.junit.Assert.*;
+
 import java.util.Random;
 
 import org.junit.Test;
@@ -41,21 +43,32 @@ public class TicTacTest {
 	private final Random random = new Random();
 	
 	@Test
-	public void test() {
+	public void testFirstMove() {
+		assertFalse(ttt.isWon());
+		assertEquals(ttt.getSquare(1, 1), aiPlay());
+	}
+	
+	@Test
+	public void fullTest() {
 		while (!ttt.isWon()) {
 			ttt.output();
-			
-			FieldScoreProducer<SimpleTTT, TTTSquare> prod = new FieldScoreProducer<SimpleTTT, TTTSquare>(getConfig(ttt), ttt);
-			ParamAndField<SimpleTTT, TTTSquare> pos = ScoreUtils.pickBest(prod, ttt, random);
-			
-			if (pos == null)
-				break;
-			ttt.playAt(pos.getField());
+			aiPlay();
 		}
 		ttt.output();
 		System.out.println("Winner is " + ttt.determineWinner());
 	}
 	
+	private TTTSquare aiPlay() {
+		FieldScoreProducer<SimpleTTT, TTTSquare> prod = new FieldScoreProducer<SimpleTTT, TTTSquare>(getConfig(ttt), ttt);
+		ParamAndField<SimpleTTT, TTTSquare> pos = ScoreUtils.pickBest(prod, ttt, random);
+		
+		if (pos == null) {
+			return null;
+		}
+		ttt.playAt(pos.getField());
+		return pos.getField();
+	}
+
 	public ScoreConfig<SimpleTTT, TTTSquare> getConfig(SimpleTTT param) {
 		if (param.getCurrentPlayer() == TTTPlayer.X) {
 			return x;
