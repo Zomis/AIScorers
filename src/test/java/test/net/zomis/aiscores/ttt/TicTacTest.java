@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.Random;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import net.zomis.aiscores.FieldScoreProducer;
@@ -20,7 +21,7 @@ import test.net.zomis.aiscores.ttt.scorers.PreventOppWin;
 import test.net.zomis.aiscores.ttt.scorers.WinIfYouCan;
 
 public class TicTacTest {
-	private ScoreConfig<SimpleTTT, TTTSquare> x = new ScoreConfigFactory<SimpleTTT, TTTSquare>()
+	private final ScoreConfig<SimpleTTT, TTTSquare> x = new ScoreConfigFactory<SimpleTTT, TTTSquare>()
 			.withPreScorer(new OneMissingAnalyzer())
 			.withScorer(new CenterScorer(), 10)
 			.withScorer(new WinIfYouCan(), 5)
@@ -29,7 +30,7 @@ public class TicTacTest {
 			.withScorer(new PreventOppWin(), 0.1)
 			.build();
 	
-	private ScoreConfig<SimpleTTT, TTTSquare> o = new ScoreConfigFactory<SimpleTTT, TTTSquare>()
+	private final ScoreConfig<SimpleTTT, TTTSquare> o = new ScoreConfigFactory<SimpleTTT, TTTSquare>()
 			.withPreScorer(new OneMissingAnalyzer())
 			.withScorer(new CenterScorer(), 10)
 			.withScorer(new CornerScorer(), -1)
@@ -37,10 +38,14 @@ public class TicTacTest {
 			.withScorer(new WinIfYouCan())
 			.build();
 	
+	private SimpleTTT ttt;
+	private Random random;
 	
-	private SimpleTTT ttt = new SimpleTTT();
-	
-	private final Random random = new Random();
+	@Before
+	public void before() {
+		ttt = new SimpleTTT();
+		random = new Random(42);
+	}
 	
 	@Test
 	public void testFirstMove() {
