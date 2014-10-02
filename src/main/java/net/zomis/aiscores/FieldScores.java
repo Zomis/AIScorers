@@ -1,6 +1,7 @@
 package net.zomis.aiscores;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.SortedSet;
  */
 public class FieldScores<P, F> implements ScoreParameters<P> {
 	private final ScoreConfig<P, F>	config;
-	private final Map<F, FieldScore<F>> scores = new HashMap<F, FieldScore<F>>();
+	private final Map<F, FieldScore<F>> scores = new LinkedHashMap<F, FieldScore<F>>();
 	private final P params;
 	private final ScoreStrategy<P, F> scoreStrategy;
 	

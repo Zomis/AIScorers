@@ -137,4 +137,8 @@ public class SimpleTTT implements ScoreStrategy<SimpleTTT, TTTSquare> {
 	public TTTPlayer getCurrentPlayer() {
 		return currentPlayer;
 	}
+
+	public void playAt(int x, int y) {
+		playAt(getSquare(x, y));
+	}
 }

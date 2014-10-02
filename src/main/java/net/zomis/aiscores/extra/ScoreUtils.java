@@ -21,7 +21,7 @@ public class ScoreUtils {
 		for (Entry<A, FieldScores<A, B>> ee : scores.entrySet()) {
 			List<FieldScore<B>> rank1 = ee.getValue().getRank(1);
 			if (rank1 == null) {
-//				CustomFacade.getLog().w("Scores has no rank 1: " + ee.getKey() + " with values " + ee.getValue().getScores());
+				// this param does not have any scored fields at all
 				continue;
 			}
 			double score = rank1.get(0).getScore();
@@ -31,8 +31,9 @@ public class ScoreUtils {
 				maxParams = ee.getKey();
 			}
 		}
-		if (maxValues == null) 
+		if (maxValues == null) { 
 			return null;
+		}
 		FieldScore<B> chosen = ScoreTools.getRandom(maxValues, random);
 		return new ParamAndField<A, B>(maxParams, chosen);
 	}

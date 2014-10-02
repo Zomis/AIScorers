@@ -44,13 +44,21 @@ public class TicTacTest {
 	@Before
 	public void before() {
 		ttt = new SimpleTTT();
-		random = new Random(42);
+		random = new Random(43);
 	}
 	
 	@Test
 	public void testFirstMove() {
 		assertFalse(ttt.isWon());
 		assertEquals(ttt.getSquare(1, 1), aiPlay());
+	}
+	
+	@Test
+	public void testBlockingMove() {
+		ttt.playAt(1, 1);
+		ttt.playAt(2, 2);
+		ttt.playAt(2, 1);
+		assertEquals(ttt.getSquare(0, 1), aiPlay());
 	}
 	
 	@Test
@@ -61,8 +69,24 @@ public class TicTacTest {
 		}
 		ttt.output();
 		System.out.println("Winner is " + ttt.determineWinner());
+		TTTPlayer NO_PLAYER = null;
+		assertEquals(TTTPlayer.O, pos(0, 0));
+		assertEquals(NO_PLAYER  , pos(1, 0));
+		assertEquals(TTTPlayer.X, pos(2, 0));
+		
+		assertEquals(TTTPlayer.O, pos(0, 1));
+		assertEquals(TTTPlayer.X, pos(1, 1));
+		assertEquals(NO_PLAYER, pos(2, 1));
+		
+		assertEquals(TTTPlayer.X, pos(0, 2));
+		assertEquals(TTTPlayer.O, pos(1, 2));
+		assertEquals(TTTPlayer.X, pos(2, 2));
 	}
 	
+	private TTTPlayer pos(int x, int y) {
+		return ttt.getSquare(x, y).getPlayedBy();
+	}
+
 	private TTTSquare aiPlay() {
 		FieldScoreProducer<SimpleTTT, TTTSquare> prod = new FieldScoreProducer<SimpleTTT, TTTSquare>(getConfig(ttt), ttt);
 		ParamAndField<SimpleTTT, TTTSquare> pos = ScoreUtils.pickBest(prod, ttt, random);
