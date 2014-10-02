@@ -2,6 +2,8 @@ package test.net.zomis.aiscores.ttt;
 
 import java.util.Random;
 
+import org.junit.Test;
+
 import net.zomis.aiscores.FieldScoreProducer;
 import net.zomis.aiscores.ScoreConfig;
 import net.zomis.aiscores.ScoreConfigFactory;
@@ -15,7 +17,7 @@ import test.net.zomis.aiscores.ttt.scorers.OneMissingAnalyzer;
 import test.net.zomis.aiscores.ttt.scorers.PreventOppWin;
 import test.net.zomis.aiscores.ttt.scorers.WinIfYouCan;
 
-public class TTMain {
+public class TicTacTest {
 	private ScoreConfig<SimpleTTT, TTTSquare> x = new ScoreConfigFactory<SimpleTTT, TTTSquare>()
 			.withPreScorer(new OneMissingAnalyzer())
 			.withScorer(new CenterScorer(), 10)
@@ -38,11 +40,8 @@ public class TTMain {
 	
 	private final Random random = new Random();
 	
-	public static void main(String[] args) {
-		new TTMain().run();
-	}
-
-	private void run() {
+	@Test
+	public void test() {
 		while (!ttt.isWon()) {
 			ttt.output();
 			
