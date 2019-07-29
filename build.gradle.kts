@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.bundling.Jar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.21"
@@ -15,6 +16,18 @@ repositories {
 
 dependencies {
     compile(kotlin("stdlib"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.5.1")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions.jvmTarget = "1.8"
 }
 
 val sourcesJar by tasks.registering(Jar::class) {

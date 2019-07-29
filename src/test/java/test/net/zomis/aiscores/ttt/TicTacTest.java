@@ -1,17 +1,17 @@
 package test.net.zomis.aiscores.ttt;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.Random;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import net.zomis.aiscores.FieldScoreProducer;
 import net.zomis.aiscores.ScoreConfig;
 import net.zomis.aiscores.ScoreConfigFactory;
 import net.zomis.aiscores.extra.ParamAndField;
 import net.zomis.aiscores.extra.ScoreUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import test.net.zomis.aiscores.ttt.SimpleTTT.TTTPlayer;
 import test.net.zomis.aiscores.ttt.scorers.CenterScorer;
 import test.net.zomis.aiscores.ttt.scorers.CornerScorer;
@@ -41,7 +41,7 @@ public class TicTacTest {
 	private SimpleTTT ttt;
 	private Random random;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		ttt = new SimpleTTT();
 		random = new Random(43);
