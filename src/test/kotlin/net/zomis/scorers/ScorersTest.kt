@@ -49,7 +49,7 @@ class ScorersTest {
         val scores = scorers.config()
             .withScorer { it.length.toDouble() }
             .withScorer(scorers.predicateScorer("predicate") { it.toUpperCase() == it }.weight(10.0))
-            .producer(42, this.strings.toList())
+            .producer(42)
             .score()
         println(scores)
         val best = scores.best()
