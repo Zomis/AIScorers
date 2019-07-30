@@ -84,8 +84,8 @@ class ScorersConfig<P, F>(val root: Scorers<P, F>,
         TODO("Post processors not supported yet")
     }
 
-    fun producer(param: P, fields: Iterable<F>): ScoreProducer<P, F> {
-        return ScoreProducer(this, param, fields)
+    fun producer(param: P): ScoreProducer<P, F> {
+        return ScoreProducer(this, param, this.root.fieldsToScore(param))
     }
 
 }
