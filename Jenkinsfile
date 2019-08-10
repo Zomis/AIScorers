@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Results') {
             steps {
-                junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
+                junit allowEmptyResults: true, testResults: '**/build/test-results/test/TEST-*.xml'
 /*
                 withSonarQubeEnv('My SonarQube Server') {
                     // requires SonarQube Scanner for Maven 3.2+
